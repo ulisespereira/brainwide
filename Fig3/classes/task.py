@@ -5,7 +5,7 @@ class working_memory_task(object):
         self.N = modelparams['N_block']
         self.n_ctx =  modelparams['n_ctx'] 
         self.p = connectivity.hebbian_symmetric.p
-        self.ind_stim = 1
+        self.ind_stim = [1]
         self.t_start = modelparams['t_start']
         self.period = modelparams['period'] 
         self.t_stim = modelparams['t_stim']
@@ -21,10 +21,11 @@ class working_memory_task(object):
 
     #input pattern hebbian 
     def pat_input(self, ind_pat=0):
-        ind1 = self.ind_stim * self.N #index start
-        ind2 = (self.ind_stim + 1) * self.N#index end
-        stim = self.patterns_asym[self.ind_stim, :, ind_pat, self.ind_asym] #pattern
-        self.i_pat[ind1:ind2] = self.g_p * stim
+        for l in self.ind_stim:
+            ind1 = l * self.N #index start
+            ind2 = (l + 1) * self.N#index end
+            stim = self.patterns_asym[l, :, ind_pat, self.ind_asym] #pattern
+            self.i_pat[ind1:ind2] = self.g_p * stim
     
     def input_current(self,t):
         ''' input current '''

@@ -26,7 +26,7 @@ class SMFTSolver(tch.nn.Module):
 
         # transfer function:
         self.phi = lambda x: 0.5 * (1 + tch.tanh(params['beta']* (x - params['h0'])))#tch.relu
-        self.phi_prime = lambda x: 0.5 * params['beta']**4 * (1 - tch.tanh(params['beta']* (x - params['h0']))**2)
+        self.phi_prime = lambda x: 0.5 * params['beta']* (1 - tch.tanh(params['beta']* (x - params['h0']))**2)
         self.xmin = params['xmin']
         self.xmax = params['xmax']
         self.dx = params['dx']
