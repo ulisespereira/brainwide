@@ -5,7 +5,7 @@ class working_memory_task(object):
         self.N = modelparams['N_block']
         self.n_ctx =  modelparams['n_ctx'] 
         self.p = connectivity.hebbian_symmetric.p
-        self.ind_stim = [1]
+        self.ind_stim = []
         self.t_start = modelparams['t_start']
         self.period = modelparams['period'] 
         self.t_stim = modelparams['t_stim']

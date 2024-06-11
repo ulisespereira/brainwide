@@ -25,7 +25,6 @@ class GaussianConnectivity:
         np.random.seed(modelparams['seed']) #random seed
         self.mat = con_params['fln'] #fln matrix
         self.N = modelparams['N_block'] # # neurons per region
-        self.indexes_vis = con_params['inds_early_visual']
         self.n_ctx = modelparams['n_ctx']  # cortical regions
 
         #amplitude connections
