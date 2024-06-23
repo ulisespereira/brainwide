@@ -19,19 +19,18 @@ class ObjectDecoding:
     def overlaps(self, rates, ind_area, ind_pat, ind_s_a=0):
         '''overlaps one area'''
         r = rates[ind_area * self.N:(ind_area + 1) * self.N]
-        if self.is_sym == True:
-            g = self.pats_sym[ind_pat, :, :, :]
-        else:
-            g = self.pats_asym[ind_pat, :, :, :]
+        g_sym = self.pats_sym[ind_pat, :, :, :]
+        g_asym = self.pats_asym[ind_pat, :, :, :]
         #std_r = np.std(r)
         #std_g = np.std(g)
         #print(std_r, np.sqrt(self.intg2))
-        ovs = np.einsum('j,jsk->sk', r, g)/(self.N )#* std_g * std_r)
+        ovs_sym = np.einsum('j,jsk->sk', r, g_sym)/(self.N )#* std_g * std_r)
+        ovs_asym = np.einsum('j,jsk->sk', r, g_asym)/(self.N )
         #std_g = np.std(g, axis = 0)
         #ov_norm = np.array([ovs[l]/(std_r * std_g[l]) for l in range(g.shape[1])])
         #ovs = np.array([[np.corrcoef(r, g[ind_pat, :, k])[0, 1] for k in range(self.p)] for l in range(self.n_ctx)])
         #ovs = np.array([np.corrcoef(r, g[:, k])[0, 1] for k in range(self.p)])
-        return ovs
+        return ovs_sym, ovs_asym
     
     def overlaps_random(self, rates, ind_area):
         '''overlaps one area with random patterns'''
@@ -42,13 +41,15 @@ class ObjectDecoding:
         return ovs
         
     def overlaps_all_areas(self, rates):
-        overlaps_list = []
+        overlaps_sym_list = []
+        overlaps_asym_list = []
         ind_area = 0
         for ind_pat, _ in self.indexes:
-            ovs = self.overlaps(rates, ind_area, ind_pat)
-            overlaps_list.append(ovs)
+            ovs_sym, ovs_asym = self.overlaps(rates, ind_area, ind_pat)
+            overlaps_sym_list.append(ovs_sym)
+            overlaps_asym_list.append(ovs_asym)
             ind_area+=1
-        return overlaps_list
+        return overlaps_sym_list, overlaps_asym_list
     
     def overlaps_all_areas_random(self, rates):
         overlaps_list = []
@@ -175,35 +176,37 @@ class NetworkDynamics:
         rates_ctx = []
         del0 = []
         overlaps_sym = []
+        overlaps_asym = []
         overlaps_random = []
         for t in time:
 
             rn_ctx = self.TF.tf_ht(hn_ctx)
-            ovs = self.overlaps.overlaps_all_areas(rn_ctx)
+            ovs_sym, ovs_asym = self.overlaps.overlaps_all_areas(rn_ctx)
 
-            hn_ctx = self.euler(hn_ctx, t, ovs, noise_struc)
+            hn_ctx = self.euler(hn_ctx, t, ovs_sym, noise_struc)
             noise_struc = noise_struc + self.field_noise_low(noise_struc)
 
             rates_ctx.append(rn_ctx[self.indexes])
-            overlaps_sym.append(ovs)
+            overlaps_sym.append(ovs_sym)
+            overlaps_asym.append(ovs_asym)
             if self.ovs_random == True:
                 ovs_rand = self.overlaps.overlaps_all_areas_random(rn_ctx)
                 overlaps_random.append(ovs_rand)
-            
             d0 = self.disorder.del0_all_areas(hn_ctx)
             del0.append(d0)
-
             print('Simulation t=',round(t,3))
         rates_ctx = np.array(rates_ctx)
         del0 = np.array(del0)
         overlaps_sym = np.array(overlaps_sym)
+        overlaps_asym = np.array(overlaps_asym)
         overlaps_random = np.array(overlaps_random)
         results = dict(
                 time = time,
                 rates_ctx = rates_ctx,
                 del0 = del0,
                 overlaps_sym = overlaps_sym,
-                overlaps_random = overlaps_random,
+                overlaps_asym = overlaps_asym,
+                overlaps_random = overlaps_random
                 )
         return results
 

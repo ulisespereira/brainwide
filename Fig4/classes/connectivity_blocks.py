@@ -25,7 +25,6 @@ class GaussianConnectivity:
         np.random.seed(modelparams['seed']) #random seed
         self.mat = con_params['fln'] #fln matrix
         self.N = modelparams['N_block'] # # neurons per region
-        self.indexes_vis = con_params['inds_early_visual']
         self.n_ctx = modelparams['n_ctx']  # cortical regions
 
         #amplitude connections
@@ -48,7 +47,7 @@ class GaussianConnectivity:
 class HebbianConnectivity:
     ''' Hebbian connectivity'''
     def __init__(self, modelparams, con_params):
-        np.random.seed()
+        #np.random.seed()
         self.N = modelparams['N_block'] # # neurons per region
         self.n_ctx = modelparams['n_ctx'] 
         self.sln = con_params['sln'] #fln matrix
@@ -57,6 +56,7 @@ class HebbianConnectivity:
         #connectivity of symmetric vs asymmetric
         self.amp_loc = modelparams['amp_loc']
         self.amp_lr = modelparams['amp_lr']
+        self.alpha_sym = modelparams['alpha_sym']
 
         #patterns
         self.subnet_indexes = [[]] #list with indexes
@@ -83,13 +83,9 @@ class HebbianConnectivity:
         i = ind_post[0]
         j = ind_pre[0]
 
-        if i == j:
-            amp_loc = self.amp_loc
-        else:
-            amp_lr = self.amp_lr
-
         hebb_sym = np.zeros((self.N, self.N))
         hebb_asym = np.zeros((self.N, self.N))
+        hebb_asym_2 = np.zeros((self.N, self.N))
         for l in range(self.p):
             ind = self.subnet_indexes[l]
             if (i in ind) * (j in ind):
@@ -100,27 +96,37 @@ class HebbianConnectivity:
                 amp_ind_asym = 0
                 
             #symmetric
-            pat_pre_sym = self.patterns_current_sym[j, :, l, :]
-            pat_post_sym = self.patterns_current_sym[i, :, l, :]
+            pat_pre_sym = self.patterns_current_sym[j, :, l, 0]
+            pat_post_sym = self.patterns_current_sym[i, :, l, 0]
 
             #asymmetric
-            pat_pre_asym = self.patterns_current_sym[j, :, l, 0:self.p_asym-1]
-            pat_post_asym = self.patterns_current_sym[i, :, l, 1:self.p_asym]
+            pat_pre_asym = self.patterns_current_asym[j, :, l, 0:self.p_asym-1]
+            pat_post_asym = self.patterns_current_asym[i, :, l, 1:self.p_asym]
+            pat_pre_asym_2 = self.patterns_current_asym[j, :, l, 0:self.p_asym-1]
+            pat_post_asym_2 = self.patterns_current_asym[i, :, l, 0:self.p_asym-1]
                 
-            #sln = np.exp(self.sln[i, j]+1)
             if i == j:
-                # recurrent symmetric connectivity
-                hebb_sym += (amp_loc * amp_ind_sym/self.N) * np.einsum('ik,jk->ij', pat_post_sym, pat_pre_sym)# np.outer(pat_post_sym, pat_pre_sym)
-                # recurrent asymmetric connectivity
-                hebb_asym += (amp_loc * amp_ind_asym/self.N) * np.einsum('ik,jk->ij', pat_post_asym, pat_pre_asym)
-            else:
-                #symmetric-symmetric projections
-                hebb_sym += (amp_lr * amp_ind_sym/self.N) * np.einsum('ik,jk->ij', pat_post_sym, pat_pre_sym)#np.outer(pat_post_sym, pat_pre_sym)
-                    
-                #asymmetric-symmetric projections
-                hebb_asym += (amp_lr * amp_ind_asym/self.N) * np.einsum('ik,jk->ij', pat_post_asym, pat_pre_asym)
+                amp_loc = self.amp_loc
+                amp_loc_sym = amp_loc * amp_ind_sym/self.N
+                amp_loc_asym = amp_loc * amp_ind_asym/self.N
 
-        return hebb_sym + hebb_asym
+                # recurrent symmetric connectivity
+                hebb_sym +=  amp_loc_sym * np.outer(pat_post_sym, pat_pre_sym)
+                # recurrent asymmetric connectivity
+                hebb_asym +=  amp_loc_asym * np.einsum('ik,jk->ij', pat_post_asym, pat_pre_asym)
+                hebb_asym_2 +=  self.alpha_sym * amp_loc_asym * np.einsum('ik,jk->ij', pat_post_asym_2, pat_pre_asym_2)
+            else:
+                amp_lr = self.amp_lr
+                amp_lr_sym = amp_lr * amp_ind_sym/self.N
+                amp_lr_asym = amp_lr * amp_ind_asym/self.N
+
+                #symmetric-symmetric projections
+                hebb_sym += amp_lr_sym * np.outer(pat_post_sym, pat_pre_sym)
+                #asymmetric-symmetric projections
+                hebb_asym += amp_lr_asym * np.einsum('ik,jk->ij', pat_post_asym, pat_pre_asym)
+                hebb_asym_2 +=  self.alpha_sym * amp_lr_asym * np.einsum('ik,jk->ij', pat_post_asym_2, pat_pre_asym_2)
+
+        return hebb_sym + hebb_asym + hebb_asym_2
     
 class CorticalConnectivity:
     def __init__(self, modelparams, con_params):

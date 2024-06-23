@@ -47,7 +47,7 @@ class GaussianConnectivity:
 class HebbianConnectivity:
     ''' Hebbian connectivity'''
     def __init__(self, modelparams, con_params):
-        np.random.seed()
+        #np.random.seed()
         self.N = modelparams['N_block'] # # neurons per region
         self.n_ctx = modelparams['n_ctx'] 
         self.sln = con_params['sln'] #fln matrix
