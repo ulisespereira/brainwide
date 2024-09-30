@@ -102,9 +102,13 @@ class HebbianConnectivity:
                 amp_ind_sym = 0
                 amp_ind_asym = 0
                 
-            #symmetric
-            pat_pre_sym = self.patterns_current_sym[j, :, l, :]
-            pat_post_sym = self.patterns_current_sym[i, :, l, :]
+            if l == 0: #DMN
+                #symmetric
+                pat_pre_sym = self.patterns_current_sym[j, :, l, 0:1]
+                pat_post_sym = self.patterns_current_sym[i, :, l, 0:1]
+            else:
+                pat_pre_sym = self.patterns_current_sym[j, :, l, :]
+                pat_post_sym = self.patterns_current_sym[i, :, l, :]
 
             #asymmetric
             pat_pre_asym = self.patterns_current_sym[j, :, l, 0:self.p_asym-1]
