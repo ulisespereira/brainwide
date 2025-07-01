@@ -56,7 +56,7 @@ Modify model parameters as needed in the cell blocks to test alternative hypothe
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
 
 ## Contact
 For questions, please contact:
