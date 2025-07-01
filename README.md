@@ -18,12 +18,6 @@ Please ensure the following Python packages are installed:
 - Matplotlib >= 3.5  
 - [OPTIONAL] Jupyter Notebook >= 6.0  
 
-Install dependencies using:
-
-```bash
-pip install -r requirements.txt
-
-
 ## Operating Systems
 Tested on:
 
@@ -36,13 +30,15 @@ A standard laptop or desktop with at least 8 GB RAM
 ##Steps
 Clone the repository:
 
-git clone https://github.com/ulisespereira/brainwide.git
-cd your_repo_name
+```git clone https://github.com/ulisespereira/brainwide.git```
+
+
 (Optional) Create and activate a virtual environment:
 
+```
 python -m venv env
 source env/bin/activate  # On Windows: env\Scripts\activate
-Install dependencies:
+```
 
 ##3. Demo
 Running the Demo
