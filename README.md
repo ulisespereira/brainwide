@@ -54,6 +54,9 @@ Open one of the notebooks in the notebooks/ folder and run the cells sequentiall
 
 Modify model parameters as needed in the cell blocks to test alternative hypotheses or reproduce custom simulations.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 For questions, please contact:
